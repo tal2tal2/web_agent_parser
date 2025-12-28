@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.Python
+.venv/
+venv/
+ENV/
+.env
+.env.*
+
+# Packaging / tooling
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Project-specific
+data/**/*
+!data/**/.gitkeep
+!data/**/README.md
+
+scratch/**/*
+!scratch/**/.gitkeep
+!scratch/**/README.md
+
+

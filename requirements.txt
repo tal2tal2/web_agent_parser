@@ -1,3 +1,21 @@
-tqdm
+## Core utilities
+tqdm>=4.67.1
+rich>=13.9.4
+typer>=0.15.1
+
+## BrowseSafe inference (per model card)
+## https://huggingface.co/perplexity-ai/browsesafe
+transformers>=4.55.4
+datasets>=2.21.0
+accelerate>=0.34.2
+safetensors>=0.4.5
+
+## Backend
 torch
+
+## Common runtime deps (often needed on Windows)
+protobuf>=4.25.3
+sentencepiece>=0.2.0
+
+## Optional experiment tracking
 wandb

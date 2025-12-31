@@ -16,6 +16,8 @@ torch
 ## Common runtime deps (often needed on Windows)
 protobuf>=4.25.3
 sentencepiece>=0.2.0
+langdetect>=1.0.9
+python-dotenv>=1.0.1
 
 ## Optional experiment tracking
 wandb

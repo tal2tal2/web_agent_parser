@@ -1,0 +1,10 @@
+{
+  "steps": [
+    {
+      "parser": "remove_obfuscated_text_html"
+    },
+    {
+      "parser": "translate_non_english_html"
+    }
+  ]
+}

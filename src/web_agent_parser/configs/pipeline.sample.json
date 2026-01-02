@@ -1,0 +1,17 @@
+{
+  "steps": [
+    {
+      "parser": "remove_obfuscated_text_html",
+      "kwargs": {
+        "min_encoded_len": 24
+      }
+    },
+    {
+      "parser": "translate_non_english_html",
+      "kwargs": {
+        "min_chars": 30,
+        "confidence_threshold": 0.85
+      }
+    }
+  ]
+}

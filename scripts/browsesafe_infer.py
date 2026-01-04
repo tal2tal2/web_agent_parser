@@ -13,7 +13,7 @@ Model reference: https://huggingface.co/perplexity-ai/browsesafe
 """
 
 from __future__ import annotations
-
+import sys
 import argparse
 import hashlib
 import json
@@ -24,8 +24,7 @@ from datasets import load_dataset, load_from_disk
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
-
+from html_parser import pi_html_parser
 ParserFn = Callable[[str], str]
 
 
@@ -44,7 +43,7 @@ def _parser_name(fn: ParserFn) -> str:
 # Optional hook:
 # - Leave as None to use identity (default).
 # - Or set to your function: def my_parser(text: str) -> str: ...
-PARSER_FN: Optional[ParserFn] = None
+PARSER_FN: Optional[ParserFn] = pi_html_parser
 
 
 def _build_prompt(tokenizer, html: str) -> str:

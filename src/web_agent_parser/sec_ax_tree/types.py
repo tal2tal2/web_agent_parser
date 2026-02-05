@@ -153,6 +153,82 @@ class SecAXTree:
             if node.region == region_type
         ]
 
+    def to_compact_text(self) -> str:
+        """
+        Renders the overview tree as a compact, indented text list.
+        Each element is 1 line.
+        """
+        lines = []
+        if self.url:
+            lines.append(f"URL: {self.url}")
+        
+        for root in self.roots:
+            self._render_node_text(root, 0, lines)
+            
+        return "\n".join(lines)
+
+    def _render_node_text(self, node: OverviewNode, depth: int, lines: List[str]):
+        indent = "  " * depth
+        
+        # Look up full details for enrichment
+        detail = self.get_node_detail(node.id)
+        
+        # Format: [ID] ROLE "Preview" (ACTION) {Kinds} <State> [Risk:Score|Reasons] loc:Locator
+        parts = [f"[{node.id}]"]
+        
+        if node.role:
+            parts.append(node.role.upper())
+            
+        if node.name_preview:
+            # Escape newlines
+            preview = node.name_preview.replace("\n", " ").strip()
+            parts.append(f'"{preview}"')
+            
+        if node.action_type != ActionType.READ_ONLY:
+            parts.append(f"({node.action_type.value})")
+            
+        # Richer Context (Kinds)
+        if detail and detail.content_kinds:
+            kinds_str = ",".join([k.value for k in detail.content_kinds])
+            parts.append(f"{{{kinds_str}}}")
+
+        # State (e.g. checked, disabled)
+        if detail and detail.state:
+            state_str = ",".join([f"{k}" for k, v in detail.state.items() if v])
+            if state_str:
+                parts.append(f"<{state_str}>")
+            
+        # Risk with reasons
+        if node.risk_score > 0:
+            reasons = ""
+            if detail and detail.risk.triggers:
+                 # Show top trigger or reason
+                 reasons = "|" + detail.risk.triggers[0]
+            elif detail and detail.risk.risk_reasons:
+                 reasons = "|" + detail.risk.risk_reasons[0]
+            parts.append(f"[Risk:{node.risk_score:.1f}{reasons}]")
+            
+        if node.region != RegionType.UNKNOWN:
+             parts.append(f"{{{node.region.value}}}")
+             
+        # Attributes of interest (Inputs)
+        if detail and detail.tag == "input":
+             type_attr = detail.attrs.get("type")
+             if type_attr:
+                 parts.append(f'type="{type_attr}"')
+        
+        # Add locator if interactive
+        if node.action_type != ActionType.READ_ONLY:
+             parts.append(f"loc:{node.locator}")
+        
+        lines.append(f"{indent}{' '.join(parts)}")
+        
+        # Recurse
+        for cid in node.child_ids:
+            child = self._find_overview_node(cid)
+            if child:
+                self._render_node_text(child, depth + 1, lines)
+
     def to_json(self, include_details: bool = False) -> Dict[str, Any]:
         """Helper to serialize for the LLM."""
         data = {
@@ -169,8 +245,6 @@ class SecAXTree:
 
     def _serialize_overview(self, node: OverviewNode) -> Dict[str, Any]:
         # Recursive serialization for overview tree
-        # In a real impl, we might flatten this to save tokens even more,
-        # but a tree structure is often easier for LLMs to reason about relationships.
         return {
             "id": node.id,
             "role": node.role,
@@ -178,7 +252,7 @@ class SecAXTree:
             "preview": node.name_preview,
             "region": node.region.value,
             "risk": node.risk_score,
-            "loc": node.locator,
+            "locator": node.locator,
             "children": [
                 self._serialize_overview(self._find_overview_node(cid)) 
                 for cid in node.child_ids 

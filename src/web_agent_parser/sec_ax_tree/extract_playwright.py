@@ -84,7 +84,7 @@ EXTRACT_SCRIPT = """
             css: getCssSelector(el),
             attributes: attrs,
             text: directText.trim(),
-            innerText: el.innerText ? el.innerText.substring(0, 500) : "", # Truncate early
+            innerText: el.innerText ? el.innerText.substring(0, 500) : "", // Truncate early
             rect: {
                 x: rect.x,
                 y: rect.y,

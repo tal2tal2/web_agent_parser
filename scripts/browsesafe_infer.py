@@ -13,7 +13,7 @@ Model reference: https://huggingface.co/perplexity-ai/browsesafe
 """
 
 from __future__ import annotations
-
+import sys
 import argparse
 import hashlib
 import json
@@ -24,7 +24,18 @@ from datasets import load_dataset, load_from_disk
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
+repo_root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(repo_root / "src"))
 
+from web_agent_parser import (
+    FunctionParserStep,
+    ParserPipeline,
+    TransformersTranslator,
+    remove_obfuscated_text_html,
+    translate_non_english_html,
+)
+from html_parser import pi_html_parser
+from sec_ax_tree_wrapper import sec_ax_tree_overview, sec_ax_tree_details
 
 ParserFn = Callable[[str], str]
 
@@ -44,7 +55,8 @@ def _parser_name(fn: ParserFn) -> str:
 # Optional hook:
 # - Leave as None to use identity (default).
 # - Or set to your function: def my_parser(text: str) -> str: ...
-PARSER_FN: Optional[ParserFn] = None
+# Available parsers: identity, pi_html_parser, sec_ax_tree_overview, sec_ax_tree_details
+PARSER_FN: Optional[ParserFn] = sec_ax_tree_details
 
 
 def _build_prompt(tokenizer, html: str) -> str:

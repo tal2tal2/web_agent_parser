@@ -110,6 +110,10 @@ class NodeCore:
     action_type: ActionType = ActionType.READ_ONLY
     risk: RiskMetadata = field(default_factory=RiskMetadata)
     
+    # Browsergym bid — integer ID used in click(bid), fill(bid, text), etc.
+    # Populated after tree construction by matching role+name against the axtree.
+    bid: Optional[str] = None
+
     # Hierarchy (IDs only for lightweight storage)
     parent_id: Optional[str] = None
     child_ids: List[str] = field(default_factory=list)
@@ -217,9 +221,11 @@ class SecAXTree:
              if type_attr:
                  parts.append(f'type="{type_attr}"')
         
-        # Add locator if interactive
+        # For interactive nodes show the bid (for actions) and locator (for context)
         if node.action_type != ActionType.READ_ONLY:
-             parts.append(f"loc:{node.locator}")
+            if detail and detail.bid is not None:
+                parts.append(f"bid={detail.bid}")
+            parts.append(f"loc:{node.locator}")
         
         lines.append(f"{indent}{' '.join(parts)}")
         
@@ -282,6 +288,7 @@ class SecAXTree:
     def _serialize_detail(self, node: NodeCore) -> Dict[str, Any]:
         return {
             "id": node.id,
+            "bid": node.bid,           # use in click(bid) / fill(bid, text) actions
             "tag": node.tag,
             "role": node.role,
             "name": node.name,
@@ -290,6 +297,7 @@ class SecAXTree:
             "state": node.state,
             "kinds": [k.value for k in node.content_kinds],
             "region": node.region.value,
+            "playwright_locator": node.locator,
             "risk": {
                 "score": node.risk.risk_score,
                 "reasons": node.risk.risk_reasons,

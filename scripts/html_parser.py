@@ -458,6 +458,16 @@ INTENT_REASONS = {
     "combo_exfil_sensitive",
 }
 
+
+def _severity(score: int) -> str:
+    # Tuned so we see tags across the dataset while still separating strong signals.
+    if score >= 10:
+        return "high"
+    if score >= 6:
+        return "medium"
+    return "low"
+    
+
 def _should_tag(reasons: Sequence[str], severity: str, score: int) -> bool:
     """
     Only emit a PI_TAG line when there's enough evidence.
@@ -492,14 +502,6 @@ def _should_tag(reasons: Sequence[str], severity: str, score: int) -> bool:
     return False
 
 
-def _severity(score: int) -> str:
-    # Tuned so we see tags across the dataset while still separating strong signals.
-    if score >= 10:
-        return "high"
-    if score >= 6:
-        return "medium"
-    return "low"
-    
 def _severity_from_reasons(reasons: Sequence[str]) -> str:
     rs = set(reasons)
 
